@@ -7,26 +7,38 @@ app.get("/", (req, res) => {
   res.send("WORKING");
 });
 
+import { spawn } from "child_process";
+
 app.post("/test-record", (req, res) => {
-  const { url } = req.body;
+  try {
+    console.log("TEST HIT:", req.body);
 
-  console.log("TEST HIT:", url);
+    const url = req.body?.url;
 
-  const { spawn } = require("child_process");
+    if (!url) {
+      return res.status(400).json({ error: "Missing URL" });
+    }
 
-  const process = spawn("echo", ["yt-dlp would run here"]);
+    const process = spawn("echo", ["test running"]);
 
-  process.stdout.on("data", d => {
-    console.log("STDOUT:", d.toString());
-  });
+    process.stdout.on("data", (d) => {
+      console.log("STDOUT:", d.toString());
+    });
 
-  process.on("close", code => {
-    console.log("PROCESS CLOSED:", code);
-  });
+    process.on("error", (err) => {
+      console.log("SPAWN ERROR:", err);
+    });
 
-  res.json({ ok: true });
+    process.on("close", (code) => {
+      console.log("PROCESS CLOSED:", code);
+    });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.log("SERVER ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
-
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
