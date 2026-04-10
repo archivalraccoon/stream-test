@@ -1,4 +1,5 @@
 import express from "express";
+import { spawn } from "child_process";
 
 const app = express();
 app.use(express.json());
@@ -6,8 +7,6 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("WORKING");
 });
-
-import { spawn } from "child_process";
 
 app.post("/test-record", (req, res) => {
   try {
@@ -18,8 +17,6 @@ app.post("/test-record", (req, res) => {
     if (!url) {
       return res.status(400).json({ error: "Missing URL" });
     }
-
-    import { spawn } from "child_process";
 
     const process = spawn("python3", ["-m", "time", "sleep", "2"]);
 
