@@ -19,7 +19,9 @@ app.post("/test-record", (req, res) => {
       return res.status(400).json({ error: "Missing URL" });
     }
 
-    const process = spawn("echo", ["test running"]);
+    import { spawn } from "child_process";
+
+    const process = spawn("python3", ["-m", "time", "sleep", "2"]);
 
     process.stdout.on("data", (d) => {
       console.log("STDOUT:", d.toString());
