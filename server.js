@@ -41,11 +41,24 @@ app.post('/test-record', (req, res) => {
   active = true;
 
   const process = spawn('yt-dlp', [
-    '--live-from-start',
-    '--no-part',
-    '-o', file,
-    url
+  '--live-from-start',
+  '--no-part',
+  '-o', file,
+  url
   ]);
+
+console.log("Starting yt-dlp...");
+
+process.stdout.on('data', d => console.log('STDOUT:', d.toString()));
+process.stderr.on('data', d => console.log('STDERR:', d.toString()));
+
+process.on('error', err => {
+  console.log('PROCESS ERROR:', err);
+});
+
+process.on('close', code => {
+  console.log('PROCESS CLOSED with code:', code);
+});
 
   process.stderr.on('data', d => console.log(d.toString()));
 
