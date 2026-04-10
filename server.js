@@ -8,7 +8,22 @@ app.get("/", (req, res) => {
 });
 
 app.post("/test-record", (req, res) => {
-  console.log("TEST HIT");
+  const { url } = req.body;
+
+  console.log("TEST HIT:", url);
+
+  const { spawn } = require("child_process");
+
+  const process = spawn("echo", ["yt-dlp would run here"]);
+
+  process.stdout.on("data", d => {
+    console.log("STDOUT:", d.toString());
+  });
+
+  process.on("close", code => {
+    console.log("PROCESS CLOSED:", code);
+  });
+
   res.json({ ok: true });
 });
 
