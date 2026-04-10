@@ -1,53 +1,72 @@
-// RAILWAY-SAFE TEST VERSION
-// Designed for Railway limitations:
-// - Single short test recording
-// - No long-running background jobs
-// - No channel watcher
-// - Minimal disk usage
-// - Optional upload via rclone (if installed)
-
-import express from 'express';
-import { spawn, exec } from 'child_process';
-import fs from 'fs';
+import express from "express";
 
 const app = express();
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("WORKING");
+});
+
+app.post("/test-record", (req, res) => {
+  console.log("TEST HIT");
+  res.json({ ok: true });
+});
+
 const PORT = process.env.PORT || 3000;
-const MAX_DURATION = 120; // max 2 minutes on Railway
 
-let active = false;
-
-// =========================
-// HEALTH CHECK
-// =========================
-app.get('/', (req, res) => {
-  res.send('Railway test recorder is running');
+app.listen(PORT, () => {
+  console.log("Server running on port", PORT);
 });
+// // RAILWAY-SAFE TEST VERSION
+// // Designed for Railway limitations:
+// // - Single short test recording
+// // - No long-running background jobs
+// // - No channel watcher
+// // - Minimal disk usage
+// // - Optional upload via rclone (if installed)
 
-// =========================
-// TEST RECORD ENDPOINT
-// =========================
+// import express from 'express';
+// import { spawn, exec } from 'child_process';
+// import fs from 'fs';
 
-app.post("/test-record", async (req, res) => {
-  const { url } = req.body;
+// const app = express();
+// app.use(express.json());
 
-  console.log("TEST STARTED:", url);
+// const PORT = process.env.PORT || 3000;
+// const MAX_DURATION = 120; // max 2 minutes on Railway
 
-  try {
-    const result = {
-      ok: true,
-      received: url,
-      time: new Date().toISOString()
-    };
+// let active = false;
 
-    console.log("TEST COMPLETE");
-    res.json(result);
-  } catch (err) {
-    console.log("ERROR:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
+// // =========================
+// // HEALTH CHECK
+// // =========================
+// app.get('/', (req, res) => {
+//   res.send('Railway test recorder is running');
+// });
+
+// // =========================
+// // TEST RECORD ENDPOINT
+// // =========================
+
+// app.post("/test-record", async (req, res) => {
+//   const { url } = req.body;
+
+//   console.log("TEST STARTED:", url);
+
+//   try {
+//     const result = {
+//       ok: true,
+//       received: url,
+//       time: new Date().toISOString()
+//     };
+
+//     console.log("TEST COMPLETE");
+//     res.json(result);
+//   } catch (err) {
+//     console.log("ERROR:", err);
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
 // app.post('/test-record', (req, res) => {
 //   const { url, duration = 60 } = req.body;
@@ -68,56 +87,26 @@ app.post("/test-record", async (req, res) => {
 //   url
 //   ]);
 
-console.log("Starting yt-dlp...");
 
-process.stdout.on('data', d => console.log('STDOUT:', d.toString()));
-process.stderr.on('data', d => console.log('STDERR:', d.toString()));
+// // =========================
+// // UPLOAD + CLEANUP
+// // =========================
+// function uploadAndCleanup(file, id) {
+//   // If rclone is available, try upload
+//   exec(`rclone move ${file} remote:test/${id}.mp4`, (err) => {
+//     if (err) {
+//       console.log('Upload skipped or failed, deleting locally');
+//       fs.unlink(file, () => {});
+//       return;
+//     }
 
-process.on('error', err => {
-  console.log('PROCESS ERROR:', err);
-});
+//     console.log('Uploaded and removed local file');
+//   });
+// }
 
-process.on('close', code => {
-  console.log('PROCESS CLOSED with code:', code);
-});
-
-  process.stderr.on('data', d => console.log(d.toString()));
-
-  // Stop after duration
-  setTimeout(() => {
-    try { process.kill(); } catch {}
-
-    // Upload (optional)
-    uploadAndCleanup(file, id);
-
-  }, safeDuration * 1000);
-
-  process.on('close', () => {
-    active = false;
-  });
-
-  res.json({ status: 'test started', id, duration: safeDuration });
-});
-
-// =========================
-// UPLOAD + CLEANUP
-// =========================
-function uploadAndCleanup(file, id) {
-  // If rclone is available, try upload
-  exec(`rclone move ${file} remote:test/${id}.mp4`, (err) => {
-    if (err) {
-      console.log('Upload skipped or failed, deleting locally');
-      fs.unlink(file, () => {});
-      return;
-    }
-
-    console.log('Uploaded and removed local file');
-  });
-}
-
-// =========================
-// START SERVER
-// =========================
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// // =========================
+// // START SERVER
+// // =========================
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
